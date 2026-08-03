@@ -133,6 +133,36 @@ def save_pending(data: dict):
     save_json(PENDING_FILE, data)
 
 # ======================
+# DYNAMIC AUTO-REACT CHATS
+# ======================
+REACT_CHATS_FILE = DATA_DIR / "react_chats.json"
+
+def get_react_chats() -> list:
+    """Get all chats where auto-react is enabled (config + dynamically added)"""
+    data = load_json(REACT_CHATS_FILE, {"chats": []})
+    chats = set(data.get("chats", []))
+    # Always include the ones from config
+    for c in AUTO_REACT_CHATS:
+        chats.add(c)
+    return list(chats)
+
+def add_react_chat(chat_id: int):
+    data = load_json(REACT_CHATS_FILE, {"chats": []})
+    chats = set(data.get("chats", []))
+    if chat_id not in chats:
+        chats.add(chat_id)
+        save_json(REACT_CHATS_FILE, {"chats": list(chats)})
+        logger.info(f"✅ Auto-react enabled for chat: {chat_id}")
+
+def remove_react_chat(chat_id: int):
+    data = load_json(REACT_CHATS_FILE, {"chats": []})
+    chats = set(data.get("chats", []))
+    if chat_id in chats:
+        chats.discard(chat_id)
+        save_json(REACT_CHATS_FILE, {"chats": list(chats)})
+        logger.info(f"❌ Auto-react disabled for chat: {chat_id}")
+
+# ======================
 # CLIENT
 # ======================
 app = Client(
@@ -399,7 +429,7 @@ async def show_stats_cb(client: Client, callback: CallbackQuery):
         f"👥 Users: `{len(get_users())}`\n"
         f"👮 Admins: `{len(get_admins())}`\n"
         f"🔄 Pending Clones: `{len(pending)}`\n"
-        f"❤️ Auto React Chats: `{len(AUTO_REACT_CHATS)}`\n"
+        f"❤️ Auto React Chats: `{len(get_react_chats())}`\n"
         f"🎨 Current Style: `{settings.get('react_style', 'default')}`\n"
         f"⏱ Delay: `{settings.get('react_delay_min')}s - {settings.get('react_delay_max')}s`\n"
         f"📦 Clone System: `{'✅ ON' if settings.get('clone_enabled') else '❌ OFF'}`\n"
@@ -669,7 +699,7 @@ async def stats_handler(client: Client, message: Message):
         f"👥 Total Users: `{len(get_users())}`\n"
         f"👮 Admins: `{len(get_admins())}`\n"
         f"🔄 Pending Clones: `{len(pending)}`\n"
-        f"❤️ Auto React Chats: `{len(AUTO_REACT_CHATS)}`\n"
+        f"❤️ Auto React Chats: `{len(get_react_chats())}`\n"
         f"🎨 Style: `{settings.get('react_style')}`\n"
         f"⏱ Delay: `{settings.get('react_delay_min')}s → {settings.get('react_delay_max')}s`\n"
         f"📦 Clone: `{'ON' if settings.get('clone_enabled') else 'OFF'}`\n"
@@ -693,6 +723,19 @@ async def styles_handler(client: Client, message: Message):
     await message.reply_text(text)
 
 
+
+@app.on_message(filters.command("reactchats") & filters.user(OWNER_ID))
+async def list_react_chats(client: Client, message: Message):
+    chats = get_react_chats()
+    if not chats:
+        return await message.reply_text("📭 Koi auto-react chat nahi hai abhi.")
+    
+    text = f"❤️ **Auto React Chats** ({len(chats)})\n\n"
+    for cid in chats:
+        text += f"• `{cid}`\n"
+    text += "\nJab bot kisi channel me **Admin** banaya jaye to automatically add ho jata hai."
+    await message.reply_text(text)
+
 @app.on_message(filters.command("id"))
 async def id_handler(client: Client, message: Message):
     if message.reply_to_message:
@@ -714,13 +757,67 @@ async def ping(client: Client, message: Message):
     await message.reply_text("🏓 **Pong!** Bot is alive.")
 
 
+
+# ======================
+# AUTO DETECT WHEN BOT IS MADE ADMIN IN ANY CHANNEL
+# ======================
+@app.on_chat_member_updated()
+async def on_bot_added(client: Client, update: ChatMemberUpdated):
+    """
+    Jab bhi bot kisi channel/group me admin banaya jaye,
+    automatically auto-react on kar do us chat me.
+    """
+    try:
+        # Only care about our own status change
+        me = await client.get_me()
+        if update.new_chat_member.user.id != me.id:
+            return
+
+        new_status = update.new_chat_member.status
+        old_status = update.old_chat_member.status if update.old_chat_member else None
+        chat = update.chat
+
+        # Bot became admin / owner
+        if new_status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]:
+            if chat.type in [enums.ChatType.CHANNEL, enums.ChatType.SUPERGROUP, enums.ChatType.GROUP]:
+                add_react_chat(chat.id)
+                try:
+                    await client.send_message(
+                        LOG_CHAT_ID,
+                        f"✅ **Auto React Enabled**\n\n"
+                        f"📢 Chat: `{chat.title}`\n"
+                        f"🆔 ID: `{chat.id}`\n"
+                        f"📌 Type: `{chat.type}`\n\n"
+                        f"Ab is channel/group me new posts pe auto react hoga."
+                    )
+                except Exception:
+                    pass
+
+        # Bot was removed or demoted
+        elif new_status in [enums.ChatMemberStatus.LEFT, enums.ChatMemberStatus.BANNED, enums.ChatMemberStatus.RESTRICTED]:
+            remove_react_chat(chat.id)
+            logger.info(f"Bot removed from {chat.id}, auto-react disabled")
+
+    except Exception as e:
+        logger.error(f"on_bot_added error: {e}")
+
+
 # ======================
 # AUTO REACT
 # ======================
-@app.on_message(filters.chat(AUTO_REACT_CHATS) & ~filters.service & ~filters.me)
+@app.on_message(~filters.service & ~filters.me & ~filters.private)
 async def auto_react_handler(client: Client, message: Message):
+    """
+    Auto react to new messages in any chat where bot is admin
+    (dynamically detected + config list)
+    """
     settings = get_settings()
     if not settings.get("auto_react_enabled", True):
+        return
+
+    # Check if this chat is in our react list
+    react_chats = get_react_chats()
+    if message.chat.id not in react_chats:
         return
 
     style = settings.get("react_style", "default")
@@ -740,6 +837,10 @@ async def auto_react_handler(client: Client, message: Message):
     except FloodWait as e:
         logger.warning(f"FloodWait {e.value}s")
         await asyncio.sleep(e.value)
+    except ChatAdminRequired:
+        # Bot is no longer admin, remove from list
+        remove_react_chat(message.chat.id)
+        logger.warning(f"No react permission in {message.chat.id}, removed from list")
     except Exception as e:
         logger.error(f"Auto react error: {e}")
 
@@ -753,7 +854,7 @@ async def main():
     logger.info(f"✅ Started as {me.first_name} (@{me.username}) | {me.id}")
     logger.info(f"👑 Owner: {OWNER_ID}")
     logger.info(f"👮 Admins: {get_admins()}")
-    logger.info(f"❤️ Auto-react chats: {len(AUTO_REACT_CHATS)}")
+    logger.info(f"❤️ Auto-react chats: {len(get_react_chats())}")
     await asyncio.Event().wait()
 
 
