@@ -16,7 +16,7 @@ Powerful Telegram Bot with:
 
 | Feature | Description |
 |---------|-------------|
-| Auto React | Multiple styles + **Auto detect** (jab bot admin bane kisi channel me) (default, fire, cute, royal, dark, party) + adjustable delay |
+| Auto React | Multiple styles (default, fire, cute, royal, dark, party) + adjustable delay |
 | Clone + Approval | Reply `/clone` → Log chat me preview + buttons |
 | Broadcast | `/broadcast` → goes for owner approval → then sends to all users |
 | Admin System | Owner can add/remove admins |
