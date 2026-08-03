@@ -11,7 +11,6 @@ Powerful Telegram Bot with:
 - ✨ Beautiful `/start` (reaction → sticker → message)
 
 ---
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/SIDHIMUSIC/tg-auto-react-clone-bot)
 
 ## ✨ Features Overview
 
@@ -44,6 +43,40 @@ python bot.py
 ```
 
 ---
+
+
+---
+
+## 🚀 Deploy on Heroku (One Click)
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/YOUR_USERNAME/tg-auto-react-clone-bot)
+
+> **Note:** Upar wale button me `YOUR_USERNAME` ko apne GitHub username se replace kar dena.
+
+### Manual Heroku Deploy:
+
+1. GitHub pe repo upload karo
+2. [Heroku Dashboard](https://dashboard.heroku.com) pe jaake **New App** banao
+3. **Deploy** tab → Connect GitHub → Select repo
+4. **Settings** → Config Vars me saari values daalo (API_ID, API_HASH, BOT_TOKEN, OWNER_ID, LOG_CHAT_ID etc.)
+5. **Resources** tab me `worker` dyno ON karo
+6. Deploy!
+
+### Important Config Vars for Heroku:
+
+| Key | Required | Example |
+|-----|----------|---------|
+| `API_ID` | ✅ | `12345678` |
+| `API_HASH` | ✅ | `abcdef...` |
+| `BOT_TOKEN` | ✅ | `123456:ABC...` |
+| `OWNER_ID` | ✅ | `123456789` |
+| `LOG_CHAT_ID` | ✅ | `-1001234567890` |
+| `FORCE_SUB_CHANNEL` | ❌ | `@YourChannel` |
+| `FORCE_SUB_CHANNEL_ID` | ❌ | `-100xxxx` |
+| `SUPPORT_CHANNEL` | ❌ | `@YourSupport` |
+| `AUTO_REACT_CHATS` | ❌ | `-100111,-100222` |
+| `DEFAULT_CLONE_TARGET` | ❌ | `-100333` |
+
 
 ## ⚙️ Important .env Settings
 

@@ -1,0 +1,77 @@
+{
+  "name": "TG Auto React + Clone Bot",
+  "description": "Telegram Auto React + Clone Bot with Approval System, Admin, Broadcast & Force Subscribe",
+  "repository": "https://github.com/YOUR_USERNAME/tg-auto-react-clone-bot",
+  "keywords": ["telegram", "bot", "pyrogram", "auto-react", "clone", "broadcast"],
+  "success_url": "/",
+  "env": {
+    "API_ID": {
+      "description": "Telegram API ID from https://my.telegram.org",
+      "required": true
+    },
+    "API_HASH": {
+      "description": "Telegram API HASH from https://my.telegram.org",
+      "required": true
+    },
+    "BOT_TOKEN": {
+      "description": "Bot Token from @BotFather",
+      "required": true
+    },
+    "OWNER_ID": {
+      "description": "Your Telegram User ID (get from @userinfobot)",
+      "required": true
+    },
+    "LOG_CHAT_ID": {
+      "description": "Log Group/Channel ID where Approve/Reject buttons will appear",
+      "required": true
+    },
+    "FORCE_SUB_CHANNEL": {
+      "description": "Force Subscribe Channel Username (e.g. @YourChannel)",
+      "required": false,
+      "value": "@YourChannel"
+    },
+    "FORCE_SUB_CHANNEL_ID": {
+      "description": "Force Subscribe Channel ID (e.g. -1001234567890)",
+      "required": false
+    },
+    "SUPPORT_CHANNEL": {
+      "description": "Support Channel Username (shown in /start)",
+      "required": false,
+      "value": "@YourSupport"
+    },
+    "AUTO_REACT_CHATS": {
+      "description": "Comma separated Chat IDs for Auto React (e.g. -100111,-100222)",
+      "required": false
+    },
+    "DEFAULT_CLONE_TARGET": {
+      "description": "Default target chat ID for cloning",
+      "required": false
+    },
+    "REACT_DELAY_MIN": {
+      "description": "Minimum reaction delay in seconds",
+      "required": false,
+      "value": "1.0"
+    },
+    "REACT_DELAY_MAX": {
+      "description": "Maximum reaction delay in seconds",
+      "required": false,
+      "value": "3.5"
+    },
+    "SESSION_NAME": {
+      "description": "Session name (keep default)",
+      "required": false,
+      "value": "tg_auto_bot"
+    }
+  },
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
