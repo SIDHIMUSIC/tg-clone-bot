@@ -11,7 +11,7 @@ Powerful Telegram Bot with:
 - ✨ Beautiful `/start` (reaction → sticker → message)
 
 ---
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/SIDHIMUSIC/tg-auto-react-clone-bot)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/SIDHIMUSIC/tg-clone-bot)
 
 ## ✨ Features Overview
 
