@@ -1,7 +1,7 @@
 {
   "name": "TG Auto React + Clone Bot",
   "description": "Telegram Auto React + Clone Bot with Approval System, Admin, Broadcast & Force Subscribe",
-  "repository": "https://github.com/YOUR_USERNAME/tg-auto-react-clone-bot",
+  "repository": "https://github.com/SIDHIMUSIC/tg-clone-bot",
   "keywords": ["telegram", "bot", "pyrogram", "auto-react", "clone", "broadcast"],
   "success_url": "/",
   "env": {
